@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.decorators import api_view
+
 import datetime
 
 from .serializers import *
@@ -14,6 +15,11 @@ class ScheduleList(generics.ListAPIView):
 
     class Meta:
         fields = '__all__'
+
+
+class ScheduleCreate(generics.CreateAPIView):
+
+    serializer_class = ScheduleSerializer
 
 
 @api_view(['POST'])

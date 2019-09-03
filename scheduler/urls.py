@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.ScheduleList.as_view()),
     path('schedulers', views.ScheduleList.as_view()),
-    path('schedulers/add', views.schedule_create),
+    path('schedulers/add', views.ScheduleCreate.as_view()),
 ]
