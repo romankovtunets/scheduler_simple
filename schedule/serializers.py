@@ -1,3 +1,4 @@
+from django.core.validators import EmailValidator
 from rest_framework import serializers
 from datetime import datetime
 
@@ -29,6 +30,15 @@ class ScheduleSerializer(serializers.Serializer):
             raise serializers.ValidationError(data['invalid date'])
 
         # validate email
+        email_validator = EmailValidator()
+        for contact in data['contacts']:
+            try:
+                email_validator(contact['email'])
+            except ValueError:
+                raise serializers.ValidationError(
+                    'Email address is not valid'
+                )
+
         return data
 
 
