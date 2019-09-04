@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from pytz import timezone
 
 
 class AssesEmailDates():
@@ -12,14 +13,13 @@ class AssesEmailDates():
         """
         Get days to skip
         """
-        iso_format ='%Y-%m-%dT%H:%M:%S.%f'
+        iso_format = '%Y-%m-%dT%H:%M:%S.%f'
 
         days_to_skip = []
         for item in skipped_days_iso:
             days_to_skip.append(datetime.strptime(item, iso_format).date())
 
         return days_to_skip
-
 
     def get_dispatch_date(self, start_date=datetime.now()):
         """
@@ -29,17 +29,16 @@ class AssesEmailDates():
         if start_date.hour in range(9, 17):
             # check date
             if start_date.date() not in self.skip_dates and \
-                                         start_date.weekday() not in (5, 6):
+                    start_date.weekday() not in (5, 6):
                 return start_date
             else:
-                next_date = (start_date + timedelta(days=1))
-                next_date.replace(hour=9, minute=0)
+                next_date = start_date + timedelta(days=1)
+                next_date = next_date.replace(hour=9, minute=0)
                 return self.get_dispatch_date(next_date)
         else:
-            next_date = (start_date + timedelta(days=1))
-            next_date.replace(hour=9, minute=0)
+            next_date = start_date + timedelta(days=1)
+            next_date = next_date.replace(hour=9, minute=0)
             return self.get_dispatch_date(next_date)
-
 
     def assesing_datetime(self):
         """

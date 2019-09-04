@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from datetime import datetime
 
 from .models import *
 from .logic import AssesEmailDates
@@ -19,29 +20,54 @@ class ScheduleSerializer(serializers.Serializer):
         model = Schedule
         fields = ['contacts']
 
-    # validators
+
+    def validate(self, data):
+        """ Validate incoming data
+        """
+        # check if date error present
+        if 'invalid date' in data:
+            raise serializers.ValidationError(data['invalid date'])
+
+        # validate email
+        return data
 
 
     def to_internal_value(self, data):
+        """ Modify initial data to validated
+        """
 
-        # modify initial data to validated
         contacts = data['contacts']
-        days_to_skip = data['days_to_skip']
+        skip_days = data['days_to_skip']
 
-        dispatcher = AssesEmailDates(emails=contacts, skip_dates=days_to_skip)
-        dispatches = dispatcher.assesing_datetime()
+        # validate date format and pass errors if invalid
+        iso_format = '%Y-%m-%dT%H:%M:%S.%f'
+        errors = {}
+
+        for date in skip_days:
+            try:
+                assert datetime.strptime(date, iso_format)
+            except ValueError:
+                errors['invalid date'] = \
+                    "Dates are not in ISO format"
 
 
-        validated_data = {'contacts': []}
+        if not errors:
+            dispatcher = AssesEmailDates(emails=contacts, skip_dates=skip_days)
+            dispatches = dispatcher.assesing_datetime()
 
-        for email in dispatches:
-            validated_data['contacts'].append(
-                {'email': email,
-                 'dispatch_date': dispatches[email],
-                 }
-            )
+            validated_data = {'contacts': []}
+
+            for email in dispatches:
+                validated_data['contacts'].append(
+                    {'email': email,
+                     'dispatch_date': dispatches[email],
+                     }
+                )
+        else:
+            validated_data = errors
 
         return validated_data
+
 
     def create(self, validated_data):
 
